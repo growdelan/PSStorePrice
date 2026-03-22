@@ -54,7 +54,7 @@ Uwagi:
 
 ---
 
-## Milestone 1.1: Pobieranie cen i kwalifikacja obniżek (planned)
+## Milestone 1.1: Pobieranie cen i kwalifikacja obniżek (done)
 
 Cel:
 - aplikacja pobiera stronę produktu z PlayStation Store, ustala cenę właściwego wariantu i aktualizuje `przecena` tylko dla realnych obniżek

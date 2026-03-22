@@ -44,6 +44,7 @@ class MilestoneOneZeroTestCase(unittest.TestCase):
             ),
         }
         self.original_authenticate = main.google_sheets.authenticate_gspread
+        self.original_fetch_html = main.playstation_store.fetch_product_html
 
     def tearDown(self):
         for key, value in self.original_env.items():
@@ -52,6 +53,7 @@ class MilestoneOneZeroTestCase(unittest.TestCase):
             else:
                 os.environ[key] = value
         main.google_sheets.authenticate_gspread = self.original_authenticate
+        main.playstation_store.fetch_product_html = self.original_fetch_html
 
     def _configure_fake_client(self):
         config_values = [
@@ -79,6 +81,9 @@ class MilestoneOneZeroTestCase(unittest.TestCase):
             }
         )
         main.google_sheets.authenticate_gspread = lambda _: fake_client
+        main.playstation_store.fetch_product_html = lambda url: (
+            "<html><body><div>Stub Game</div><div>PS5</div><div>999,00 zl</div></body></html>"
+        )
 
     def test_run_price_check_reads_config_and_price_rows(self):
         os.environ["GOOGLE_CONFIG_SHEET_ID"] = "config-sheet"

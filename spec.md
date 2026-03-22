@@ -103,6 +103,10 @@ Aplikacja **nie**:
 - Uzasadnienie: wynika to z wymagan operacyjnych repo oraz potrzeby unikniecia fallbackow i danych dostepowych zaszytych w kodzie.
 - Konsekwencje: uruchomienie aplikacji poza testami wymaga jawnej konfiguracji srodowiska przed startem.
 
+- Decyzja: w Milestone 1.1 wybor monitorowanego wariantu produktu odbywa sie na podstawie ceny bazowej z kolumny `cena`, z dodatkowym wsparciem dopasowania do `Nazwa`.
+- Uzasadnienie: PRD wskazuje, ze uzytkownik identyfikuje monitorowany wariant przez pozycje wpisana w arkuszu i jej cene referencyjna, bez wprowadzania dodatkowej kolumny wariantu.
+- Konsekwencje: gdy strona zawiera wiele edycji o podobnych nazwach, poprawne dopasowanie zalezy od zgodnosci `Nazwa` i `cena` z rzeczywistym wariantem na stronie PS Store.
+
 ---
 
 ## Jakość i kryteria akceptacji

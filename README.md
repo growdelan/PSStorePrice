@@ -30,7 +30,7 @@ Uruchomienie aplikacji:
 uv run main.py
 ```
 
-Aktualny stan po Milestone 1.0 odczytuje centralny arkusz konfiguracyjny i wskazane arkusze robocze, a nastepnie wypisuje podsumowanie liczby wczytanych konfiguracji i pozycji.
+Aktualny stan po Milestone 1.1 odczytuje centralny arkusz konfiguracyjny i wskazane arkusze robocze, pobiera strony produktow z PlayStation Store, wybiera monitorowany wariant na podstawie `cena` i `Nazwa`, a nastepnie aktualizuje `przecena` tylko dla realnych obnizek.
 
 ## Testy
 

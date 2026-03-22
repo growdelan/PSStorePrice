@@ -75,11 +75,27 @@ def read_price_rows(worksheet) -> list[dict]:
             raise RuntimeError(f"Brak wymaganej kolumny w arkuszu roboczym: {column}")
 
     price_rows = []
-    for row in values[1:]:
+    for row_index, row in enumerate(values[1:], start=2):
         if not any(str(value).strip() for value in row):
             continue
         row_dict = _row_to_dict(header, row)
         if not row_dict["link"]:
             continue
+        row_dict["row_number"] = row_index
         price_rows.append(row_dict)
     return price_rows
+
+
+def update_discount_price(worksheet, row_number: int, price: float) -> None:
+    """Aktualizuje kolumne `przecena` dla wskazanego wiersza."""
+    values = worksheet.get_all_values()
+    if not values:
+        raise RuntimeError("Arkusz roboczy jest pusty.")
+
+    header = _normalize_header(values[0])
+    try:
+        discount_column = header.index("przecena") + 1
+    except ValueError as exc:
+        raise RuntimeError("Brak wymaganej kolumny w arkuszu roboczym: przecena") from exc
+
+    worksheet.update_cell(row_number, discount_column, f"{price:.2f}")

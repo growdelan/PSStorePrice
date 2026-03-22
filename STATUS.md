@@ -3,31 +3,34 @@
 ## Co działa
 - aplikacja uruchamia się poleceniem `uv run main.py`
 - aplikacja czyta centralny arkusz konfiguracyjny Google Sheets
-- aplikacja potrafi odczytać wskazane arkusze robocze i policzyć pozycje do dalszego przetwarzania
-- testy dla odczytu konfiguracji i arkuszy roboczych przechodzą lokalnie
+- aplikacja pobiera strony produktow z `store.playstation.com`
+- aplikacja wybiera monitorowany wariant po `cena` i wspiera dopasowanie po `Nazwa`
+- aplikacja aktualizuje pole `przecena` tylko dla realnych obnizek
+- testy dla odczytu konfiguracji, parsowania cen i aktualizacji przecen przechodzą lokalnie
 
 ## Co jest skończone
 - przygotowano bazowy PRD w `prd/000-initial-prd.md`
 - uzupełniono `spec.md` oraz `ROADMAP.md` zgodnie z bazowym PRD
 - zrealizowano Milestone 0.5
 - zrealizowano Milestone 1.0
+- zrealizowano Milestone 1.1
 - opisano konfigurację Google Sheets, uruchomienie i testy w `README.md`
 
 ## Co jest w trakcie
 - brak aktywnej implementacji kolejnego milestone'u
 
 ## Co jest następne
-- Milestone 1.1: pobieranie stron produktów i ekstrakcja cen
-- porównanie ceny wykrytej z `cena` dla właściwego wariantu produktu
-- aktualizacja pola `przecena` w arkuszu roboczym
+- Milestone 1.2: zbiorcze powiadomienia e-mail
+- agregacja zmian na poziomie pojedynczego wpisu konfiguracyjnego
+- odporność przebiegu na błędy częściowe i finalizacja operacyjna
 
 ## Blokery i ryzyka
-- obecny przebieg nie pobiera jeszcze stron `store.playstation.com`
 - główne ryzyko domenowe pozostaje w ekstrakcji ceny i dopasowaniu właściwego wariantu produktu ze strony PS Store
 - powodzenie kolejnych etapów zależy od poprawnej konfiguracji dostępu do Google Sheets i później SMTP poza repozytorium
+- aplikacja nie wysyła jeszcze e-maili, więc operator nie otrzymuje zbiorczych powiadomien po przebiegu
 
 ## Ostatnie aktualizacje
-- dodano integrację z Google Sheets w `storage/google_sheets.py`
-- przebudowano `main.py` do odczytu konfiguracji i arkuszy roboczych
-- dodano testy `tests/test_milestone_1_0.py`
-- oznaczono Milestone 1.0 jako `done` w `ROADMAP.md`
+- dodano scraper `scrapers/playstation_store.py`
+- rozszerzono `main.py` o pobieranie cen i aktualizację `przecena`
+- dodano testy `tests/test_milestone_1_1.py`
+- oznaczono Milestone 1.1 jako `done` w `ROADMAP.md`
