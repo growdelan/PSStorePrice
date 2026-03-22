@@ -1,0 +1,1 @@
+"""Pakiet scraperow aplikacji."""
