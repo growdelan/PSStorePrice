@@ -5,6 +5,7 @@ import os
 
 from dotenv import load_dotenv
 
+from emails import notifications
 from scrapers import playstation_store
 from storage import google_sheets
 
@@ -18,6 +19,9 @@ def load_config():
         "GOOGLE_CONFIG_SHEET_ID",
         "GOOGLE_CONFIG_WORKSHEET",
         "GSPREAD_SERVICE_ACCOUNT_FILE",
+        "SMTP_SERVER",
+        "SENDER_MAIL",
+        "SENDER_PASS",
     ]
 
     config = {}
@@ -64,6 +68,7 @@ def process_price_rows(worksheet, price_rows, fetch_html=None):
         fetch_html = playstation_store.fetch_product_html
     checked_items = 0
     updated_items = 0
+    changes = []
     for price_row in price_rows:
         checked_items += 1
         try:
@@ -81,6 +86,14 @@ def process_price_rows(worksheet, price_rows, fetch_html=None):
                     price=current_price,
                 )
                 updated_items += 1
+                changes.append(
+                    {
+                        "Nazwa": price_row["nazwa"],
+                        "Link": price_row["link"],
+                        "cena": base_price,
+                        "przecena": current_price,
+                    }
+                )
         except Exception as exc:
             LOGGER.warning(
                 "Nie udalo sie przetworzyc pozycji %s (%s): %s",
@@ -92,6 +105,7 @@ def process_price_rows(worksheet, price_rows, fetch_html=None):
     return {
         "checked_items": checked_items,
         "updated_items": updated_items,
+        "changes": changes,
     }
 
 
@@ -104,24 +118,43 @@ def run_price_check():
     run_result = {
         "configuration_count": len(configuration_entries),
         "processed_sheets": [],
+        "sent_emails": 0,
     }
     for entry in configuration_entries:
-        _, worksheet = google_sheets.open_sheet(
-            gc=gc,
-            spreadsheet_id=entry["dokument"],
-            worksheet_title=entry["arkusz"],
-        )
-        price_rows = google_sheets.read_price_rows(worksheet)
-        sheet_result = process_price_rows(worksheet, price_rows)
-        run_result["processed_sheets"].append(
-            {
-                "email": entry["email"],
-                "spreadsheet_id": entry["dokument"],
-                "worksheet": entry["arkusz"],
-                "item_count": sheet_result["checked_items"],
-                "updated_items": sheet_result["updated_items"],
-            }
-        )
+        try:
+            _, worksheet = google_sheets.open_sheet(
+                gc=gc,
+                spreadsheet_id=entry["dokument"],
+                worksheet_title=entry["arkusz"],
+            )
+            price_rows = google_sheets.read_price_rows(worksheet)
+            sheet_result = process_price_rows(worksheet, price_rows)
+            if sheet_result["changes"]:
+                notifications.send_email(
+                    smtp_server=config["SMTP_SERVER"],
+                    sender_mail=config["SENDER_MAIL"],
+                    sender_pass=config["SENDER_PASS"],
+                    recipient=entry["email"],
+                    changes=sheet_result["changes"],
+                )
+                run_result["sent_emails"] += 1
+            run_result["processed_sheets"].append(
+                {
+                    "email": entry["email"],
+                    "spreadsheet_id": entry["dokument"],
+                    "worksheet": entry["arkusz"],
+                    "item_count": sheet_result["checked_items"],
+                    "updated_items": sheet_result["updated_items"],
+                }
+            )
+        except Exception as exc:
+            LOGGER.warning(
+                "Nie udalo sie przetworzyc konfiguracji %s/%s (%s): %s",
+                entry["dokument"],
+                entry["arkusz"],
+                entry["email"],
+                exc,
+            )
     return run_result
 
 
@@ -132,7 +165,8 @@ def build_summary(run_result):
     return (
         "Wczytano "
         f"{run_result['configuration_count']} konfiguracje i "
-        f"{total_items} pozycje, zaktualizowano {updated_items} przeceny."
+        f"{total_items} pozycje, zaktualizowano {updated_items} przeceny, "
+        f"wyslano {run_result['sent_emails']} e-maili."
     )
 
 

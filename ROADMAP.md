@@ -79,7 +79,7 @@ Uwagi:
 
 ---
 
-## Milestone 1.2: Zbiorcze powiadomienia e-mail i odporność przebiegu (planned)
+## Milestone 1.2: Zbiorcze powiadomienia e-mail i odporność przebiegu (done)
 
 Cel:
 - aplikacja wysyła jeden zbiorczy e-mail na wpis konfiguracyjny i zachowuje odporność na błędy częściowe

@@ -107,6 +107,10 @@ Aplikacja **nie**:
 - Uzasadnienie: PRD wskazuje, ze uzytkownik identyfikuje monitorowany wariant przez pozycje wpisana w arkuszu i jej cene referencyjna, bez wprowadzania dodatkowej kolumny wariantu.
 - Konsekwencje: gdy strona zawiera wiele edycji o podobnych nazwach, poprawne dopasowanie zalezy od zgodnosci `Nazwa` i `cena` z rzeczywistym wariantem na stronie PS Store.
 
+- Decyzja: w Milestone 1.2 konfiguracja SMTP jest dostarczana przez `SMTP_SERVER`, `SENDER_MAIL` i `SENDER_PASS`, a powiadomienia sa wysylane pojedynczo per wpis konfiguracyjny.
+- Uzasadnienie: roadmapa wymaga jednego zbiorczego e-maila na wpis konfiguracyjny oraz zgodnosci z dotychczasowym sposobem wysylki.
+- Konsekwencje: aplikacja wymaga poprawnej konfiguracji SMTP przed uruchomieniem i nie grupuje zmian z roznych wpisow konfiguracyjnych do jednego wspolnego maila.
+
 ---
 
 ## Jakość i kryteria akceptacji

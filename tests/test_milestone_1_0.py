@@ -42,6 +42,9 @@ class MilestoneOneZeroTestCase(unittest.TestCase):
             "GSPREAD_SERVICE_ACCOUNT_FILE": os.environ.get(
                 "GSPREAD_SERVICE_ACCOUNT_FILE"
             ),
+            "SMTP_SERVER": os.environ.get("SMTP_SERVER"),
+            "SENDER_MAIL": os.environ.get("SENDER_MAIL"),
+            "SENDER_PASS": os.environ.get("SENDER_PASS"),
         }
         self.original_authenticate = main.google_sheets.authenticate_gspread
         self.original_fetch_html = main.playstation_store.fetch_product_html
@@ -89,6 +92,9 @@ class MilestoneOneZeroTestCase(unittest.TestCase):
         os.environ["GOOGLE_CONFIG_SHEET_ID"] = "config-sheet"
         os.environ["GOOGLE_CONFIG_WORKSHEET"] = "Users"
         os.environ["GSPREAD_SERVICE_ACCOUNT_FILE"] = "service_account.json"
+        os.environ["SMTP_SERVER"] = "smtp.example.com"
+        os.environ["SENDER_MAIL"] = "sender@example.com"
+        os.environ["SENDER_PASS"] = "secret"
         self._configure_fake_client()
 
         run_result = main.run_price_check()
@@ -102,6 +108,9 @@ class MilestoneOneZeroTestCase(unittest.TestCase):
         os.environ["GOOGLE_CONFIG_SHEET_ID"] = "config-sheet"
         os.environ["GOOGLE_CONFIG_WORKSHEET"] = "Users"
         os.environ["GSPREAD_SERVICE_ACCOUNT_FILE"] = "service_account.json"
+        os.environ["SMTP_SERVER"] = "smtp.example.com"
+        os.environ["SENDER_MAIL"] = "sender@example.com"
+        os.environ["SENDER_PASS"] = "secret"
         self._configure_fake_client()
 
         stdout = io.StringIO()

@@ -15,6 +15,9 @@ Minimalna aplikacja do monitorowania cen w PS Store rozwijana milestone'ami.
    - `GOOGLE_CONFIG_SHEET_ID`
    - `GOOGLE_CONFIG_WORKSHEET`
    - `GSPREAD_SERVICE_ACCOUNT_FILE`
+   - `SMTP_SERVER`
+   - `SENDER_MAIL`
+   - `SENDER_PASS`
 
 ## Uruchomienie
 
@@ -30,7 +33,7 @@ Uruchomienie aplikacji:
 uv run main.py
 ```
 
-Aktualny stan po Milestone 1.1 odczytuje centralny arkusz konfiguracyjny i wskazane arkusze robocze, pobiera strony produktow z PlayStation Store, wybiera monitorowany wariant na podstawie `cena` i `Nazwa`, a nastepnie aktualizuje `przecena` tylko dla realnych obnizek.
+Aktualny stan po Milestone 1.2 odczytuje centralny arkusz konfiguracyjny i wskazane arkusze robocze, pobiera strony produktow z PlayStation Store, wybiera monitorowany wariant na podstawie `cena` i `Nazwa`, aktualizuje `przecena` tylko dla realnych obnizek i wysyla zbiorczy e-mail dla zmian z danego wpisu konfiguracyjnego.
 
 ## Testy
 

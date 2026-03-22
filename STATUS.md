@@ -6,7 +6,9 @@
 - aplikacja pobiera strony produktow z `store.playstation.com`
 - aplikacja wybiera monitorowany wariant po `cena` i wspiera dopasowanie po `Nazwa`
 - aplikacja aktualizuje pole `przecena` tylko dla realnych obnizek
-- testy dla odczytu konfiguracji, parsowania cen i aktualizacji przecen przechodzą lokalnie
+- aplikacja agreguje zmiany per wpis konfiguracyjny i wysyla jeden zbiorczy e-mail
+- błąd jednego wpisu konfiguracyjnego nie blokuje przetwarzania kolejnych
+- testy dla odczytu konfiguracji, parsowania cen, aktualizacji przecen i wysylki e-mail przechodzą lokalnie
 
 ## Co jest skończone
 - przygotowano bazowy PRD w `prd/000-initial-prd.md`
@@ -14,23 +16,23 @@
 - zrealizowano Milestone 0.5
 - zrealizowano Milestone 1.0
 - zrealizowano Milestone 1.1
+- zrealizowano Milestone 1.2
 - opisano konfigurację Google Sheets, uruchomienie i testy w `README.md`
 
 ## Co jest w trakcie
-- brak aktywnej implementacji kolejnego milestone'u
+- brak aktywnej implementacji
 
 ## Co jest następne
-- Milestone 1.2: zbiorcze powiadomienia e-mail
-- agregacja zmian na poziomie pojedynczego wpisu konfiguracyjnego
-- odporność przebiegu na błędy częściowe i finalizacja operacyjna
+- brak kolejnych milestone'ow w aktualnej roadmapie
+- ewentualne dalsze zmiany wymagaja nowego PRD lub aktualizacji roadmapy
 
 ## Blokery i ryzyka
 - główne ryzyko domenowe pozostaje w ekstrakcji ceny i dopasowaniu właściwego wariantu produktu ze strony PS Store
-- powodzenie kolejnych etapów zależy od poprawnej konfiguracji dostępu do Google Sheets i później SMTP poza repozytorium
-- aplikacja nie wysyła jeszcze e-maili, więc operator nie otrzymuje zbiorczych powiadomien po przebiegu
+- poprawne dzialanie produkcyjne zalezy od konfiguracji dostepu do Google Sheets i SMTP poza repozytorium
+- zmiana struktury strony PS Store moze wymagac aktualizacji parsera cen
 
 ## Ostatnie aktualizacje
-- dodano scraper `scrapers/playstation_store.py`
-- rozszerzono `main.py` o pobieranie cen i aktualizację `przecena`
-- dodano testy `tests/test_milestone_1_1.py`
-- oznaczono Milestone 1.1 jako `done` w `ROADMAP.md`
+- dodano warstwe e-maili w `emails/notifications.py`
+- rozszerzono `main.py` o agregacje zmian, wysylke powiadomien i obsluge bledow czesciowych
+- dodano testy `tests/test_milestone_1_2.py`
+- oznaczono Milestone 1.2 jako `done` w `ROADMAP.md`
