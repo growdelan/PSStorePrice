@@ -79,21 +79,35 @@ def process_price_rows(worksheet, price_rows, fetch_html=None):
                 reference_price=price_row["cena"],
             )
             base_price = playstation_store.parse_price_value(price_row["cena"])
+            recorded_discount = None
+            if str(price_row["przecena"]).strip():
+                recorded_discount = playstation_store.parse_price_value(
+                    price_row["przecena"]
+                )
+
             if current_price < base_price:
+                if recorded_discount != current_price:
+                    google_sheets.update_discount_price(
+                        worksheet=worksheet,
+                        row_number=price_row["row_number"],
+                        price=current_price,
+                    )
+                    updated_items += 1
+                    changes.append(
+                        {
+                            "Nazwa": price_row["nazwa"],
+                            "Link": price_row["link"],
+                            "cena": base_price,
+                            "przecena": current_price,
+                        }
+                    )
+            elif recorded_discount is not None and recorded_discount != base_price:
                 google_sheets.update_discount_price(
                     worksheet=worksheet,
                     row_number=price_row["row_number"],
-                    price=current_price,
+                    price=base_price,
                 )
                 updated_items += 1
-                changes.append(
-                    {
-                        "Nazwa": price_row["nazwa"],
-                        "Link": price_row["link"],
-                        "cena": base_price,
-                        "przecena": current_price,
-                    }
-                )
         except Exception as exc:
             LOGGER.warning(
                 "Nie udalo sie przetworzyc pozycji %s (%s): %s",

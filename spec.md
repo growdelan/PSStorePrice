@@ -107,6 +107,14 @@ Aplikacja **nie**:
 - Uzasadnienie: PRD wskazuje, ze uzytkownik identyfikuje monitorowany wariant przez pozycje wpisana w arkuszu i jej cene referencyjna, bez wprowadzania dodatkowej kolumny wariantu.
 - Konsekwencje: gdy strona zawiera wiele edycji o podobnych nazwach, poprawne dopasowanie zalezy od zgodnosci `Nazwa` i `cena` z rzeczywistym wariantem na stronie PS Store.
 
+- Decyzja: parser cen obsluguje zapis walut `zł`, `£` i `€`, a w przypadku wykrycia wariantu trialowego pomija go i wybiera pierwsza platna pozycje ponizej.
+- Uzasadnienie: wynika to z rzeczywistego ukladu stron PlayStation Store, gdzie trial moze byc pokazywany przed zakupem pelnej wersji oraz gdzie ceny nie zawsze sa prezentowane w polskiej walucie.
+- Konsekwencje: ekstrakcja cen jest lepiej dopasowana do realnych stron sklepu, ale pozostaje wrazliwa na dalsze zmiany struktury strony.
+
+- Decyzja: pole `przecena` jest zapisywane do Google Sheets jako wartosc liczbowa i wraca do ceny bazowej po zakonczeniu promocji.
+- Uzasadnienie: pozwala to zachowac poprawny format liczbowy w arkuszu i utrzymac spojnosc danych po wygaśnięciu promocji.
+- Konsekwencje: aplikacja nie pozostawia w arkuszu historycznej przeceny, tylko utrzymuje aktualny stan ceny wzgledem ceny bazowej.
+
 - Decyzja: w Milestone 1.2 konfiguracja SMTP jest dostarczana przez `SMTP_SERVER`, `SENDER_MAIL` i `SENDER_PASS`, a powiadomienia sa wysylane pojedynczo per wpis konfiguracyjny.
 - Uzasadnienie: roadmapa wymaga jednego zbiorczego e-maila na wpis konfiguracyjny oraz zgodnosci z dotychczasowym sposobem wysylki.
 - Konsekwencje: aplikacja wymaga poprawnej konfiguracji SMTP przed uruchomieniem i nie grupuje zmian z roznych wpisow konfiguracyjnych do jednego wspolnego maila.

@@ -9,9 +9,13 @@ import main
 class FakeWorksheet:
     def __init__(self, values):
         self._values = values
+        self.updated_cells = []
 
     def get_all_values(self):
         return self._values
+
+    def update_cell(self, row, column, value):
+        self.updated_cells.append((row, column, value))
 
 
 class FakeSpreadsheet:

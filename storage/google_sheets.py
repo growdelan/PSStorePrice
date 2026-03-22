@@ -98,4 +98,4 @@ def update_discount_price(worksheet, row_number: int, price: float) -> None:
     except ValueError as exc:
         raise RuntimeError("Brak wymaganej kolumny w arkuszu roboczym: przecena") from exc
 
-    worksheet.update_cell(row_number, discount_column, f"{price:.2f}")
+    worksheet.update_cell(row_number, discount_column, price)

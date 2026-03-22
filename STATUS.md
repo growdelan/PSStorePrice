@@ -5,7 +5,9 @@
 - aplikacja czyta centralny arkusz konfiguracyjny Google Sheets
 - aplikacja pobiera strony produktow z `store.playstation.com`
 - aplikacja wybiera monitorowany wariant po `cena` i wspiera dopasowanie po `Nazwa`
-- aplikacja aktualizuje pole `przecena` tylko dla realnych obnizek
+- aplikacja pomija wariant trialowy (`Game Trial` / `Wersja próbna gry`) i bierze pierwsza platna opcje ponizej
+- aplikacja obsluguje ceny zapisywane jako `zł`, `£` i `€`
+- aplikacja aktualizuje `przecena` jako liczbe oraz przywraca ja do ceny bazowej po zakonczeniu promocji
 - aplikacja agreguje zmiany per wpis konfiguracyjny i wysyla jeden zbiorczy e-mail
 - błąd jednego wpisu konfiguracyjnego nie blokuje przetwarzania kolejnych
 - testy dla odczytu konfiguracji, parsowania cen, aktualizacji przecen i wysylki e-mail przechodzą lokalnie
@@ -36,3 +38,6 @@
 - rozszerzono `main.py` o agregacje zmian, wysylke powiadomien i obsluge bledow czesciowych
 - dodano testy `tests/test_milestone_1_2.py`
 - oznaczono Milestone 1.2 jako `done` w `ROADMAP.md`
+- poprawiono parser cen dla walut `£` i `€`
+- dodano obsluge wariantu trialowego w PlayStation Store
+- poprawiono zapis `przecena`, aby byl liczba i wracal do ceny bazowej po zakonczeniu promocji

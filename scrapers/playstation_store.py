@@ -5,7 +5,10 @@ import re
 from html.parser import HTMLParser
 from urllib.request import Request, urlopen
 
-PRICE_RE = re.compile(r"(?P<amount>\d+(?:[.,]\d{2})?)\s*(?:zl|zł)")
+PRICE_RE = re.compile(
+    r"(?:(?:£|€)\s*(?P<prefix_amount>\d+(?:[.,]\d{2})?)|(?P<suffix_amount>\d+(?:[.,]\d{2})?)\s*(?:zl|zł|eur|gbp))",
+    re.IGNORECASE,
+)
 
 
 class TextExtractor(HTMLParser):
@@ -43,7 +46,7 @@ def parse_price_value(raw_value: str) -> float:
     if not match:
         cleaned = re.sub(r"[^0-9,.\-]", "", cleaned)
     else:
-        cleaned = match.group("amount")
+        cleaned = match.group("prefix_amount") or match.group("suffix_amount")
     cleaned = cleaned.replace(",", ".")
     if not cleaned:
         raise RuntimeError(f"Nie mozna zinterpretowac ceny: {raw_value}")
@@ -64,6 +67,11 @@ def _normalize_text(value: str) -> str:
 def _is_platform_line(value: str) -> bool:
     normalized = _normalize_text(value)
     return normalized.startswith("ps4") or normalized.startswith("ps5")
+
+
+def _is_trial_line(value: str) -> bool:
+    normalized = _normalize_text(value)
+    return "game trial" in normalized or "wersja próbna gry" in normalized
 
 
 def _extract_candidates(lines: list[str]) -> list[dict]:
@@ -89,6 +97,18 @@ def _extract_candidates(lines: list[str]) -> list[dict]:
             }
         )
     return candidates
+
+
+def _extract_price_after_trial(lines: list[str]) -> float | None:
+    trial_indices = [index for index, line in enumerate(lines) if _is_trial_line(line)]
+    if not trial_indices:
+        return None
+
+    first_trial_index = trial_indices[0]
+    for line in lines[first_trial_index + 1 :]:
+        if PRICE_RE.search(line.lower()):
+            return parse_price_value(line)
+    return None
 
 
 def choose_variant_price(
@@ -128,5 +148,8 @@ def choose_variant_price(
 def extract_current_price(page_html: str, expected_name: str, reference_price: str) -> float:
     """Ekstrahuje cene aktualnie monitorowanego wariantu produktu."""
     lines = extract_text_lines(page_html)
+    trial_price = _extract_price_after_trial(lines)
+    if trial_price is not None:
+        return trial_price
     candidates = _extract_candidates(lines)
     return choose_variant_price(candidates, expected_name, reference_price)
