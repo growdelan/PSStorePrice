@@ -1,6 +1,20 @@
 # PSStorePrice
 
-Minimalny bootstrap aplikacji do monitorowania cen w PS Store.
+Minimalna aplikacja do monitorowania cen w PS Store rozwijana milestone'ami.
+
+## Wymagania
+
+- `uv`
+- konto Google z arkuszem konfiguracyjnym oraz arkuszami roboczymi
+- konto serwisowe Google z dostepem do wymaganych arkuszy
+
+## Konfiguracja
+
+1. Skopiuj `.env.example` do `.env`.
+2. Ustaw wymagane zmienne:
+   - `GOOGLE_CONFIG_SHEET_ID`
+   - `GOOGLE_CONFIG_WORKSHEET`
+   - `GSPREAD_SERVICE_ACCOUNT_FILE`
 
 ## Uruchomienie
 
@@ -16,7 +30,7 @@ Uruchomienie aplikacji:
 uv run main.py
 ```
 
-Aktualny Milestone 0.5 uruchamia minimalny przebieg end-to-end na stubowanych danych i wypisuje wynik do standardowego wyjscia.
+Aktualny stan po Milestone 1.0 odczytuje centralny arkusz konfiguracyjny i wskazane arkusze robocze, a nastepnie wypisuje podsumowanie liczby wczytanych konfiguracji i pozycji.
 
 ## Testy
 

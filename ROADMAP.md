@@ -31,7 +31,7 @@ Zakres:
 
 ---
 
-## Milestone 1.0: Integracja z konfiguracją i arkuszami roboczymi (planned)
+## Milestone 1.0: Integracja z konfiguracją i arkuszami roboczymi (done)
 
 Cel:
 - aplikacja odczytuje centralny arkusz konfiguracyjny i przetwarza wiele arkuszy roboczych w jednym przebiegu

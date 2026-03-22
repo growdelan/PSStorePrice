@@ -95,6 +95,14 @@ Aplikacja **nie**:
 - Uzasadnienie: roadmapa dla etapu 0.5 wymaga minimalnego działającego przebiegu end-to-end bez wdrażania jeszcze integracji z Google Sheets, HTTP i SMTP.
 - Konsekwencje: pierwszy slice potwierdza przepływ logiki biznesowej i uruchamialność aplikacji, ale nie realizuje jeszcze docelowych integracji zewnętrznych.
 
+- Decyzja: centralny arkusz konfiguracyjny w Milestone 1.0 uzywa kolumn `dokument`, `arkusz` i `email`.
+- Uzasadnienie: to najprostsze odwzorowanie danych wejściowych wynikające z przekazanego workflow `n8n`.
+- Konsekwencje: aplikacja oczekuje dokladnie takiego modelu wejscia dla konfiguracji przebiegow, a ewentualna zmiana nazewnictwa kolumn bedzie wymagac aktualizacji integracji.
+
+- Decyzja: konfiguracja dostepu do Google Sheets jest dostarczana wylacznie przez zmienne srodowiskowe `GOOGLE_CONFIG_SHEET_ID`, `GOOGLE_CONFIG_WORKSHEET` oraz `GSPREAD_SERVICE_ACCOUNT_FILE`.
+- Uzasadnienie: wynika to z wymagan operacyjnych repo oraz potrzeby unikniecia fallbackow i danych dostepowych zaszytych w kodzie.
+- Konsekwencje: uruchomienie aplikacji poza testami wymaga jawnej konfiguracji srodowiska przed startem.
+
 ---
 
 ## Jakość i kryteria akceptacji
