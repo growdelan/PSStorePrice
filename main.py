@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 
 from dotenv import load_dotenv
 
@@ -10,6 +11,8 @@ from scrapers import playstation_store
 from storage import google_sheets
 
 LOGGER = logging.getLogger(__name__)
+MAX_RETRY_ATTEMPTS = 5
+RETRY_DELAY_SECONDS = 3
 
 
 def load_config():
@@ -135,41 +138,70 @@ def run_price_check():
         "sent_emails": 0,
     }
     for entry in configuration_entries:
-        try:
-            _, worksheet = google_sheets.open_sheet(
-                gc=gc,
-                spreadsheet_id=entry["dokument"],
-                worksheet_title=entry["arkusz"],
-            )
-            price_rows = google_sheets.read_price_rows(worksheet)
-            sheet_result = process_price_rows(worksheet, price_rows)
-            if sheet_result["changes"]:
-                notifications.send_email(
-                    smtp_server=config["SMTP_SERVER"],
-                    sender_mail=config["SENDER_MAIL"],
-                    sender_pass=config["SENDER_PASS"],
-                    recipient=entry["email"],
-                    changes=sheet_result["changes"],
+        for attempt in range(1, MAX_RETRY_ATTEMPTS + 1):
+            try:
+                _, worksheet = google_sheets.open_sheet(
+                    gc=gc,
+                    spreadsheet_id=entry["dokument"],
+                    worksheet_title=entry["arkusz"],
                 )
-                run_result["sent_emails"] += 1
-            run_result["processed_sheets"].append(
-                {
-                    "email": entry["email"],
-                    "spreadsheet_id": entry["dokument"],
-                    "worksheet": entry["arkusz"],
-                    "item_count": sheet_result["checked_items"],
-                    "updated_items": sheet_result["updated_items"],
-                }
-            )
-        except Exception as exc:
-            LOGGER.warning(
-                "Nie udalo sie przetworzyc konfiguracji %s/%s (%s): %s",
-                entry["dokument"],
-                entry["arkusz"],
-                entry["email"],
-                exc,
-            )
+                price_rows = google_sheets.read_price_rows(worksheet)
+                sheet_result = process_price_rows(worksheet, price_rows)
+                if sheet_result["changes"]:
+                    notifications.send_email(
+                        smtp_server=config["SMTP_SERVER"],
+                        sender_mail=config["SENDER_MAIL"],
+                        sender_pass=config["SENDER_PASS"],
+                        recipient=entry["email"],
+                        changes=sheet_result["changes"],
+                    )
+                    run_result["sent_emails"] += 1
+                run_result["processed_sheets"].append(
+                    {
+                        "email": entry["email"],
+                        "spreadsheet_id": entry["dokument"],
+                        "worksheet": entry["arkusz"],
+                        "item_count": sheet_result["checked_items"],
+                        "updated_items": sheet_result["updated_items"],
+                    }
+                )
+                if attempt > 1:
+                    LOGGER.info(
+                        "Przetworzono konfiguracje %s/%s (%s) po %s probach.",
+                        entry["dokument"],
+                        entry["arkusz"],
+                        entry["email"],
+                        attempt,
+                    )
+                break
+            except Exception as exc:
+                if _is_temporary_integration_error(exc) and attempt < MAX_RETRY_ATTEMPTS:
+                    LOGGER.warning(
+                        "Tymczasowy blad dla konfiguracji %s/%s (%s), proba %s/%s: %s",
+                        entry["dokument"],
+                        entry["arkusz"],
+                        entry["email"],
+                        attempt,
+                        MAX_RETRY_ATTEMPTS,
+                        exc,
+                    )
+                    time.sleep(RETRY_DELAY_SECONDS)
+                    continue
+                LOGGER.warning(
+                    "Nie udalo sie przetworzyc konfiguracji %s/%s (%s): %s",
+                    entry["dokument"],
+                    entry["arkusz"],
+                    entry["email"],
+                    exc,
+                )
+                break
     return run_result
+
+
+def _is_temporary_integration_error(exc: Exception) -> bool:
+    """Rozpoznaje bledy tymczasowe, dla ktorych nalezy uruchomic retry."""
+    message = str(exc).lower()
+    return "421" in message and "4.3.0" in message and "temporary system problem" in message
 
 
 def build_summary(run_result):

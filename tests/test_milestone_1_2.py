@@ -83,8 +83,10 @@ class MilestoneOneTwoTestCase(unittest.TestCase):
             "SENDER_PASS": os.environ.get("SENDER_PASS"),
         }
         self.original_authenticate = main.google_sheets.authenticate_gspread
+        self.original_open_sheet = main.google_sheets.open_sheet
         self.original_fetch_html = main.playstation_store.fetch_product_html
         self.original_smtp = notifications.smtplib.SMTP
+        self.original_sleep = main.time.sleep
 
     def tearDown(self):
         for key, value in self.original_env.items():
@@ -93,8 +95,10 @@ class MilestoneOneTwoTestCase(unittest.TestCase):
             else:
                 os.environ[key] = value
         main.google_sheets.authenticate_gspread = self.original_authenticate
+        main.google_sheets.open_sheet = self.original_open_sheet
         main.playstation_store.fetch_product_html = self.original_fetch_html
         notifications.smtplib.SMTP = self.original_smtp
+        main.time.sleep = self.original_sleep
 
     def _configure_env(self):
         os.environ["GOOGLE_CONFIG_SHEET_ID"] = "config-sheet"
@@ -162,6 +166,92 @@ class MilestoneOneTwoTestCase(unittest.TestCase):
         parsed_message = email.message_from_string(smtp_instance.sent_messages[0][2])
         self.assertEqual("Promocje w PS Store!", parsed_message["Subject"])
         self.assertEqual("good@example.com", parsed_message["To"])
+
+    def test_run_price_check_retries_temporary_error_and_then_succeeds(self):
+        self._configure_env()
+
+        config_values = [
+            ["dokument", "arkusz", "email"],
+            ["good-sheet", "ListaGood", "good@example.com"],
+        ]
+        good_sheet_values = [
+            ["Nazwa", "Link", "cena", "przecena"],
+            ["Game One", "https://example.com/game-one", "299,00 zl", ""],
+        ]
+        fake_client = FakeClient(
+            {
+                "config-sheet": FakeSpreadsheet({"Users": FakeWorksheet(config_values)}),
+                "good-sheet": FakeSpreadsheet({"ListaGood": FakeWorksheet(good_sheet_values)}),
+            }
+        )
+        main.google_sheets.authenticate_gspread = lambda _: fake_client
+        main.playstation_store.fetch_product_html = (
+            lambda url: "<html><body><div>Game One</div><div>PS5</div><div>249,00 zl</div></body></html>"
+        )
+        notifications.smtplib.SMTP = FakeSMTP
+
+        sleep_calls = []
+        main.time.sleep = lambda seconds: sleep_calls.append(seconds)
+        attempts = {"count": 0}
+
+        def flaky_open_sheet(gc, spreadsheet_id, worksheet_title):
+            if spreadsheet_id == "good-sheet" and attempts["count"] == 0:
+                attempts["count"] += 1
+                raise RuntimeError(
+                    "(421, b'4.3.0 Temporary System Problem. Try again later. - gsmtp')"
+                )
+            return self.original_open_sheet(gc, spreadsheet_id, worksheet_title)
+
+        main.google_sheets.open_sheet = flaky_open_sheet
+
+        run_result = main.run_price_check()
+
+        self.assertEqual(1, run_result["configuration_count"])
+        self.assertEqual(1, len(run_result["processed_sheets"]))
+        self.assertEqual(1, run_result["sent_emails"])
+        self.assertEqual([3], sleep_calls)
+
+    def test_run_price_check_stops_after_five_temporary_failures(self):
+        self._configure_env()
+
+        config_values = [
+            ["dokument", "arkusz", "email"],
+            ["good-sheet", "ListaGood", "good@example.com"],
+        ]
+        good_sheet_values = [
+            ["Nazwa", "Link", "cena", "przecena"],
+            ["Game One", "https://example.com/game-one", "299,00 zl", ""],
+        ]
+        fake_client = FakeClient(
+            {
+                "config-sheet": FakeSpreadsheet({"Users": FakeWorksheet(config_values)}),
+                "good-sheet": FakeSpreadsheet({"ListaGood": FakeWorksheet(good_sheet_values)}),
+            }
+        )
+        main.google_sheets.authenticate_gspread = lambda _: fake_client
+        main.playstation_store.fetch_product_html = (
+            lambda url: "<html><body><div>Game One</div><div>PS5</div><div>249,00 zl</div></body></html>"
+        )
+        notifications.smtplib.SMTP = FakeSMTP
+
+        sleep_calls = []
+        main.time.sleep = lambda seconds: sleep_calls.append(seconds)
+
+        def always_failing_open_sheet(gc, spreadsheet_id, worksheet_title):
+            if spreadsheet_id == "good-sheet":
+                raise RuntimeError(
+                    "(421, b'4.3.0 Temporary System Problem. Try again later. - gsmtp')"
+                )
+            return self.original_open_sheet(gc, spreadsheet_id, worksheet_title)
+
+        main.google_sheets.open_sheet = always_failing_open_sheet
+
+        run_result = main.run_price_check()
+
+        self.assertEqual(1, run_result["configuration_count"])
+        self.assertEqual(0, len(run_result["processed_sheets"]))
+        self.assertEqual(0, run_result["sent_emails"])
+        self.assertEqual([3, 3, 3, 3], sleep_calls)
 
 
 if __name__ == "__main__":

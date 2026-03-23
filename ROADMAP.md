@@ -101,3 +101,24 @@ Zakres:
 
 Uwagi:
 - milestone domyka pełne odwzorowanie workflow `n8n` w aplikacji Python
+
+---
+
+## Milestone 1.3: Retry dla tymczasowych błędów integracji (planned)
+
+Cel:
+- aplikacja ponawia operacje dla tymczasowych bledow podczas obslugi wpisu konfiguracyjnego, aby ograniczyc przypadki porazki po pierwszym nieudanym podejsciu
+
+Definition of Done:
+- retry jest wykonywane maksymalnie 5 razy dla bledow tymczasowych klasy `421 4.3.0 Temporary System Problem`
+- miedzy kolejnymi probami zachowana jest przerwa 3 sekund
+- pierwsza udana proba konczy dalsze retry dla danego wpisu konfiguracyjnego
+- po wyczerpaniu prob wpis konfiguracyjny jest logowany jako nieudany, a aplikacja przechodzi do kolejnego wpisu
+- bledy trwale (np. brak uprawnien, zla konfiguracja) nie uruchamiaja retry
+- testy pokrywaja scenariusz sukcesu po retry oraz scenariusz wyczerpania prob
+
+Zakres:
+- klasyfikacja bledow tymczasowych dla obslugi wpisu konfiguracyjnego
+- mechanizm retry 5x z odstepem 3 sekundy
+- logowanie numeru proby i finalnego wyniku
+- testy jednostkowe/scenariuszowe dla nowej logiki retry

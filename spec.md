@@ -24,6 +24,7 @@ Główne przepływy:
 - porównanie ceny aktualnej z ceną bazową,
 - zapis zmian do arkusza roboczego,
 - agregacja zmian i wysyłka powiadomienia e-mail.
+- ponawianie operacji dla wpisu konfiguracyjnego przy bledach tymczasowych integracji zewnetrznych (do 5 prob co 3 sekundy).
 
 Aplikacja **nie**:
 - zarządza harmonogramem uruchomień,
@@ -48,6 +49,7 @@ Aplikacja **nie**:
    - dla każdego produktu aplikacja pobiera stronę z `store.playstation.com` i ustala aktualną cenę,
    - wynik porównania z wartością `cena` decyduje o aktualizacji pola `przecena`,
    - zmienione rekordy są agregowane w ramach jednego wpisu konfiguracyjnego,
+   - przy bledzie tymczasowym obslugi wpisu konfiguracyjnego aplikacja wykonuje retry zgodnie z polityka prob,
    - po zakończeniu przetwarzania danej konfiguracji generowany i wysyłany jest jeden e-mail zbiorczy.
 
 3. Granice odpowiedzialności
@@ -66,6 +68,7 @@ Aplikacja **nie**:
 - komponent ekstrakcji ceny odpowiedzialny za odczyt ceny z HTML oraz interpretację właściwego wariantu produktu,
 - komponent logiki domenowej odpowiedzialny za porównanie ceny aktualnej z ceną bazową i decyzję o aktualizacji `przecena`,
 - komponent e-mail odpowiedzialny za wygenerowanie wiadomości zgodnej z obecnym szablonem z workflow `n8n`,
+- mechanizm retry odpowiedzialny za ponawianie operacji dla bledow tymczasowych podczas obslugi wpisu konfiguracyjnego,
 - warstwa logowania odpowiedzialna za diagnostykę przebiegu i raportowanie błędów do logów.
 
 ---
@@ -119,6 +122,10 @@ Aplikacja **nie**:
 - Uzasadnienie: roadmapa wymaga jednego zbiorczego e-maila na wpis konfiguracyjny oraz zgodnosci z dotychczasowym sposobem wysylki.
 - Konsekwencje: aplikacja wymaga poprawnej konfiguracji SMTP przed uruchomieniem i nie grupuje zmian z roznych wpisow konfiguracyjnych do jednego wspolnego maila.
 
+- Decyzja: dla bledow tymczasowych podczas obslugi wpisu konfiguracyjnego aplikacja stosuje retry do 5 prob z opoznieniem 3 sekund miedzy probami (dotyczy PRD: 001-retry-transient-google-sheet-errors.md).
+- Uzasadnienie: ogranicza to wplyw przejsciowych problemow zewnetrznych (np. `421 4.3.0 Temporary System Problem`) bez zmiany logiki biznesowej monitoringu cen.
+- Konsekwencje: pojedynczy wpis konfiguracyjny moze byc przetwarzany dluzej, ale liczba falszywych niepowodzen wynikajacych z chwilowych bledow integracji powinna sie zmniejszyc.
+
 ---
 
 ## Jakość i kryteria akceptacji
@@ -127,6 +134,7 @@ Wspólne wymagania jakościowe:
 - przebieg jest idempotentny dla niezmienionych cen,
 - błąd pojedynczego produktu nie przerywa przetwarzania pozostałych produktów,
 - błąd pojedynczego wpisu konfiguracyjnego nie blokuje przetwarzania kolejnych wpisów,
+- bledy tymczasowe podczas obslugi wpisu konfiguracyjnego sa obslugiwane retry do 5 prob co 3 sekundy,
 - brak możliwości wykrycia ceny jest raportowany wyłącznie w logach,
 - sekrety są dostarczane przez zmienne środowiskowe lub plik konta serwisowego poza repozytorium,
 - testy obejmują logikę porównania cen, obsługę arkuszy oraz generowanie powiadomień bez realnego IO zewnętrznego.
@@ -136,6 +144,7 @@ Kryteria akceptacji:
 - dla pozycji z niższą ceną niż `cena` aktualizowane jest pole `przecena`,
 - dla pozycji bez realnej obniżki nie są wysyłane powiadomienia,
 - dla jednego wpisu konfiguracyjnego powstaje jeden zbiorczy e-mail z listą zmian,
+- dla bledow tymczasowych zgodnych z polityka retry aplikacja ponawia probe do 5 razy i kontynuuje przetwarzanie po wyczerpaniu prob,
 - format wiadomości jest zgodny z dotychczasowym szablonem `n8n`,
 - dokumentacja uruchomienia i konfiguracji odpowiada rzeczywistemu sposobowi działania aplikacji.
 
@@ -152,10 +161,11 @@ Kryteria akceptacji:
 ## Powiązanie z roadmapą
 - Szczegóły milestone’ów i ich statusy znajdują się w `ROADMAP.md`.
 - Roadmapa prowadzi od minimalnego przebiegu end-to-end przez integrację z Google Sheets i logikę monitoringu cen do pełnego odwzorowania powiadomień e-mail zgodnych z workflow `n8n`.
+- Dalsze rozszerzenia po Milestone 1.2 obejmuja odpornosc na bledy tymczasowe integracji zgodnie z przyrostowym PRD.
 
 ---
 
 ## Status specyfikacji
 - Data utworzenia: 2026-03-22
-- Ostatnia aktualizacja: 2026-03-22
-- Aktualny zakres obowiązywania: bazowy zakres produktu wynikający z `prd/000-initial-prd.md`
+- Ostatnia aktualizacja: 2026-03-23
+- Aktualny zakres obowiązywania: bazowy zakres produktu wynikajacy z `prd/000-initial-prd.md` oraz rozszerzenie z `prd/001-retry-transient-google-sheet-errors.md`
