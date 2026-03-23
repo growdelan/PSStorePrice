@@ -104,7 +104,7 @@ Uwagi:
 
 ---
 
-## Milestone 1.3: Retry dla tymczasowych błędów integracji (planned)
+## Milestone 1.3: Retry dla tymczasowych błędów integracji (done)
 
 Cel:
 - aplikacja ponawia operacje dla tymczasowych bledow podczas obslugi wpisu konfiguracyjnego, aby ograniczyc przypadki porazki po pierwszym nieudanym podejsciu

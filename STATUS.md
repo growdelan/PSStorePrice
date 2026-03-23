@@ -9,6 +9,7 @@
 - aplikacja obsluguje ceny zapisywane jako `zł`, `£` i `€`
 - aplikacja aktualizuje `przecena` jako liczbe oraz przywraca ja do ceny bazowej po zakonczeniu promocji
 - aplikacja agreguje zmiany per wpis konfiguracyjny i wysyla jeden zbiorczy e-mail
+- aplikacja ponawia obsluge wpisu konfiguracyjnego do 5 razy (co 3 sekundy) dla bledow tymczasowych `421 4.3.0 Temporary System Problem`
 - błąd jednego wpisu konfiguracyjnego nie blokuje przetwarzania kolejnych
 - testy dla odczytu konfiguracji, parsowania cen, aktualizacji przecen i wysylki e-mail przechodzą lokalnie
 
@@ -19,6 +20,7 @@
 - zrealizowano Milestone 1.0
 - zrealizowano Milestone 1.1
 - zrealizowano Milestone 1.2
+- zrealizowano Milestone 1.3
 - opisano konfigurację Google Sheets, uruchomienie i testy w `README.md`
 
 ## Co jest w trakcie
@@ -34,6 +36,9 @@
 - zmiana struktury strony PS Store moze wymagac aktualizacji parsera cen
 
 ## Ostatnie aktualizacje
+- dodano retry 5x z opoznieniem 3 sekund dla tymczasowych bledow `421 4.3.0` podczas obslugi wpisu konfiguracyjnego
+- dodano testy retry (sukces po ponowieniu oraz wyczerpanie prob) w `tests/test_milestone_1_2.py`
+- oznaczono Milestone 1.3 jako `done` w `ROADMAP.md`
 - dodano warstwe e-maili w `emails/notifications.py`
 - rozszerzono `main.py` o agregacje zmian, wysylke powiadomien i obsluge bledow czesciowych
 - dodano testy `tests/test_milestone_1_2.py`

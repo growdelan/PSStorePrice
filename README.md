@@ -33,7 +33,9 @@ Uruchomienie aplikacji:
 uv run main.py
 ```
 
-Aktualny stan po Milestone 1.2 odczytuje centralny arkusz konfiguracyjny i wskazane arkusze robocze, pobiera strony produktow z PlayStation Store, wybiera monitorowany wariant na podstawie `cena` i `Nazwa`, pomija wariant trialowy, aktualizuje `przecena` tylko dla realnych obnizek lub przywraca ja do ceny bazowej po zakonczeniu promocji, a nastepnie wysyla zbiorczy e-mail dla zmian z danego wpisu konfiguracyjnego.
+Aktualny stan po Milestone 1.3 odczytuje centralny arkusz konfiguracyjny i wskazane arkusze robocze, pobiera strony produktow z PlayStation Store, wybiera monitorowany wariant na podstawie `cena` i `Nazwa`, pomija wariant trialowy, aktualizuje `przecena` tylko dla realnych obnizek lub przywraca ja do ceny bazowej po zakonczeniu promocji, a nastepnie wysyla zbiorczy e-mail dla zmian z danego wpisu konfiguracyjnego.
+
+Podczas obslugi pojedynczego wpisu konfiguracyjnego aplikacja stosuje retry dla bledow tymczasowych `421 4.3.0 Temporary System Problem`: maksymalnie 5 prob z 3-sekundowa przerwa miedzy probami.
 
 ## Testy
 
